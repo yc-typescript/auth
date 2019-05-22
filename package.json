@@ -1,5 +1,5 @@
 {
-  "name": "auth",
+  "name": "@yct/auth",
   "version": "1.0.0",
   "description": "auth",
   "license": "MIT",

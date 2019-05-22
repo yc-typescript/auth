@@ -9,7 +9,6 @@ export class Auth {
   private __onSignout: Array<() => Promise<void>> = [];
   private __interval = 0;
 
-
   public async setup(ac: AuthConfig) {
     this.__as = ac.storage;
     this.__decoder = ac.decoder;
@@ -24,8 +23,7 @@ export class Auth {
   public async signJwt(jwt: string): Promise<any> {
     this.__jwt = jwt;
     const res = await this.__as!.set(this.JWT_KEY, jwt);
-    for (const fn of this.__onSignjwt)
-      await fn();
+    for (const fn of this.__onSignjwt) await fn();
     return res;
   }
 
@@ -41,8 +39,7 @@ export class Auth {
   public async signout(): Promise<void> {
     delete this.__jwt;
     await this.__as!.delete(this.JWT_KEY);
-    for (const fn of this.__onSignout)
-      await fn();
+    for (const fn of this.__onSignout) await fn();
   }
 
   public onSignjwt(fn: () => Promise<void>) {
@@ -78,8 +75,7 @@ export class Auth {
   private async check(fn?: () => Promise<void>) {
     if (!this.__interval) return;
     const cb = fn || (() => this.signout());
-    if (this.__jwt && !this.info)
-      await cb();
+    if (this.__jwt && !this.info) await cb();
     setTimeout(() => {
       this.check(fn);
     }, this.__interval);
@@ -126,4 +122,4 @@ export interface AuthInfo {
     name: string;
     openid: string;
   }>;
-};
+}

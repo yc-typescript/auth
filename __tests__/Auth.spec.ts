@@ -12,9 +12,9 @@ describe('AuthModule', () => {
         get: x => Promise.resolve(localStorage.getItem(x)),
         set: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
         delete: x => Promise.resolve(localStorage.removeItem(x)),
-        clear: () => Promise.resolve(localStorage.clear())
+        clear: () => Promise.resolve(localStorage.clear()),
       },
-      decoder: jwt.decode as any
+      decoder: jwt.decode as any,
     });
     await auth.ready();
   });
@@ -31,10 +31,14 @@ describe('AuthModule', () => {
   });
 
   it('Should be authenticated', () => {
-    const token = jwt.sign({
-      username: 'tom',
-      roles: ['admin', 'user']
-    }, 'secret', { expiresIn: '1m' });
+    const token = jwt.sign(
+      {
+        username: 'tom',
+        roles: ['admin', 'user'],
+      },
+      'secret',
+      { expiresIn: '1m' }
+    );
     auth.signJwt(token);
     expect(auth.isAuthenticated).toBe(true);
     expect(auth.info).toBeTruthy();
@@ -50,20 +54,28 @@ describe('AuthModule', () => {
   });
 
   it('Should be expired', () => {
-    const token = jwt.sign({
-      username: 'tom',
-      roles: ['admin', 'user']
-    }, 'secret', { expiresIn: '0s' });
+    const token = jwt.sign(
+      {
+        username: 'tom',
+        roles: ['admin', 'user'],
+      },
+      'secret',
+      { expiresIn: '0s' }
+    );
     auth.signJwt(token);
     expect(auth.isAuthenticated).toBe(false);
     expect(auth.info).toBe(null);
   });
 
   it('Should signout', async () => {
-    const token = jwt.sign({
-      username: 'tom',
-      roles: ['admin', 'user']
-    }, 'secret', { expiresIn: '1m' });
+    const token = jwt.sign(
+      {
+        username: 'tom',
+        roles: ['admin', 'user'],
+      },
+      'secret',
+      { expiresIn: '1m' }
+    );
     auth.signJwt(token);
     await auth.signout();
     expect(auth.isAuthenticated).toBe(false);
@@ -72,10 +84,14 @@ describe('AuthModule', () => {
   });
 
   it('Should exec event handler', async () => {
-    const token = jwt.sign({
-      username: 'tom',
-      roles: ['admin', 'user']
-    }, 'secret', { expiresIn: '1m' });
+    const token = jwt.sign(
+      {
+        username: 'tom',
+        roles: ['admin', 'user'],
+      },
+      'secret',
+      { expiresIn: '1m' }
+    );
     let handleOnSignjwt = false;
     let handleOnSignout = false;
     auth.onSignjwt(async () => {
@@ -91,10 +107,14 @@ describe('AuthModule', () => {
   });
 
   it('Should not exec event handler', async () => {
-    const token = jwt.sign({
-      username: 'tom',
-      roles: ['admin', 'user']
-    }, 'secret', { expiresIn: '1m' });
+    const token = jwt.sign(
+      {
+        username: 'tom',
+        roles: ['admin', 'user'],
+      },
+      'secret',
+      { expiresIn: '1m' }
+    );
     let handleOnSignjwt = false;
     let handleOnSignout = false;
     const fnOnSignjwt = async () => {
@@ -116,10 +136,14 @@ describe('AuthModule', () => {
   });
 
   it('Should check exp', async () => {
-    const token = jwt.sign({
-      username: 'tom',
-      roles: ['admin', 'user']
-    }, 'secret', { expiresIn: '1s' });
+    const token = jwt.sign(
+      {
+        username: 'tom',
+        roles: ['admin', 'user'],
+      },
+      'secret',
+      { expiresIn: '1s' }
+    );
     auth.signJwt(token);
 
     let signedout = false;
@@ -129,7 +153,7 @@ describe('AuthModule', () => {
     auth.enableCheckExp(100);
     await new Promise(resolve => setTimeout(resolve, 1000));
     expect(signedout).toBe(true);
-    
+
     signedout = false;
     auth.signJwt(token);
     auth.enableCheckExp(0);
