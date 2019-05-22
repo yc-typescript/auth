@@ -1,34 +1,76 @@
-[![Build Status](https://travis-ci.org/{{github-user-name}}/{{github-app-name}}.svg?branch=master)](https://travis-ci.org/{{github-user-name}}/{{github-app-name}}.svg?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/{{github-user-name}}/{{github-app-name}}/badge.svg?branch=master)](https://coveralls.io/github/{{github-user-name}}/{{github-app-name}}?branch=master)
+[![Build Status](https://travis-ci.org/yc-typescript/auth.svg?branch=master)](https://travis-ci.org/yc-typescript/auth.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/yc-typescript/auth/badge.svg?branch=master)](https://coveralls.io/github/yc-typescript/auth?branch=master)
 [![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 
-# Using this module in other modules
+# @yca/auth
 
-Here is a quick example of how this module can be used in other modules. The [TypeScript Module Resolution Logic](https://www.typescriptlang.org/docs/handbook/module-resolution.html) makes it quite easy. The file `src/index.ts` is a [barrel](https://basarat.gitbooks.io/typescript/content/docs/tips/barrel.html) that re-exports selected exports from other files. The _package.json_ file contains `main` attribute that points to the generated `lib/index.js` file and `typings` attribute that points to the generated `lib/index.d.ts` file.
+## Installation
+```
+ npm i -S @yct/auth
+```
 
-> If you are planning to have code in multiple files (which is quite natural for a NodeJS module) that users can import, make sure you update `src/index.ts` file appropriately.
-
-Now assuming you have published this amazing module to _npm_ with the name `my-amazing-lib`, and installed it in the module in which you need it -
-
-- To use the `Greeter` class in a TypeScript file -
+## Setup storage and decoder
 
 ```ts
-import { Greeter } from "my-amazing-lib";
+import { Auth } from '@yct/auth';
+import * as jwt from 'jsonwebtoken';
 
-const greeter = new Greeter("World!");
-greeter.greet();
+const auth = new Auth();
+auth.setup({
+  storage: {
+    get: x => Promise.resolve(localStorage.getItem(x)),
+    set: (key, value) => Promise.resolve(localStorage.setItem(key, value)),
+    delete: x => Promise.resolve(localStorage.removeItem(x)),
+    clear: () => Promise.resolve(localStorage.clear()),
+  },
+  decoder: jwt.decode as any
+});
 ```
 
-- To use the `Greeter` class in a JavaScript file -
+## Methods and Properties
+```ts
+setup(ac: AuthConfig): Promise<void>;
+ready() Promise<void>;
+signJwt(jwt: string): Promise<void>;
+signout(): Promise<void>;
 
-```js
-const Greeter = require('my-amazing-lib').Greeter;
+hasRoles(...roles: string[]): boolean;
 
-const greeter = new Greeter('World!');
-greeter.greet();
+onSignjwt(fn: () => Promise<void>): void;
+onSignout(fn: () => Promise<void>): void;
+offSignjwt(fn: () => Promise<void>): void;
+offSignout(fn: () => Promise<void>): void;
+
+enableCheckExp(interval: number, fn?: () => Promise<void>): void;
+
+get jwt(): string;
+get isAuthenticated(): boolean;
+get info(): AuthInfo | null;
 ```
 
-## Setting travis and coveralls badges
-1. Sign in to [travis](https://travis-ci.org/) and activate the build for your project.
-2. Sign in to [coveralls](https://coveralls.io/) and activate the build for your project.
-3. Replace {{github-user-name}}/{{github-app-name}} with your repo details like: "ospatil/generator-node-typescript".
+## Interfaces and Types
+```ts
+export interface AuthConfig {
+  storage: AuthStorage;
+  decoder: AuthDecoder;
+}
+
+export type AuthDecoder = (jwt: string) => AuthInfo;
+
+export interface AuthStorage {
+  get(key: string): Promise<any>;
+  set(key: string, value: any): Promise<any>;
+  delete(key: string): Promise<any>;
+  clear(): Promise<any>;
+}
+
+export interface AuthInfo {
+  _id: string;
+  roles: string[];
+  username: string;
+  providers: Array<{
+    name: string;
+    openid: string;
+  }>;
+}
+```

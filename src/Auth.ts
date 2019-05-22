@@ -20,11 +20,10 @@ export class Auth {
     return this.__ready;
   }
 
-  public async signJwt(jwt: string): Promise<any> {
+  public async signJwt(jwt: string) {
     this.__jwt = jwt;
-    const res = await this.__as!.set(this.JWT_KEY, jwt);
+    await this.__as!.set(this.JWT_KEY, jwt);
     for (const fn of this.__onSignjwt) await fn();
-    return res;
   }
 
   public hasRoles(...roles: string[]): boolean {
