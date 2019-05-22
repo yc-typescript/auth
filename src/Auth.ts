@@ -63,7 +63,7 @@ export class Auth {
     if (~i) this.__onSignout.splice(i, 1);
   }
 
-  public enableCheck(interval: number, fn?: () => void) {
+  public enableCheckExp(interval: number, fn?: () => Promise<void>) {
     this.__interval = interval;
     this.check(fn);
   }
@@ -75,13 +75,13 @@ export class Auth {
     }
   }
 
-  private check(fn?: () => void) {
+  private async check(fn?: () => Promise<void>) {
     if (!this.__interval) return;
-    const cb = fn || this.signout;
+    const cb = fn || (() => this.signout());
     if (this.__jwt && !this.info)
-      cb();
+      await cb();
     setTimeout(() => {
-      this.check();
+      this.check(fn);
     }, this.__interval);
   }
 

@@ -114,4 +114,26 @@ describe('AuthModule', () => {
     expect(handleOnSignjwt).toBe(false);
     expect(handleOnSignout).toBe(false);
   });
+
+  it('Should check exp', async () => {
+    const token = jwt.sign({
+      username: 'tom',
+      roles: ['admin', 'user']
+    }, 'secret', { expiresIn: '1s' });
+    auth.signJwt(token);
+
+    let signedout = false;
+    auth.onSignout(async () => {
+      signedout = true;
+    });
+    auth.enableCheckExp(100);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    expect(signedout).toBe(true);
+    
+    signedout = false;
+    auth.signJwt(token);
+    auth.enableCheckExp(0);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    expect(signedout).toBe(false);
+  });
 });
